@@ -4,13 +4,10 @@
     </head>
     <body>
         <b>Hosts</b>
-        <div class="hosts">
-        {% for host in hosts %}
-        - {{host}}</br>
-            {% for container in containers[host] %}
-            -> {{container['Names']}} {{container['Image']}}</br>
-            {% endfor %}
-        {% endfor %}
+        <div class='hosts' >
         </div>
+        <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/docker.js"></script>
+        <script type="text/javascript" src="/static/js/dashboard.js"></script>
     </body>
-<html>
+</html>
