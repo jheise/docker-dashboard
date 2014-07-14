@@ -10,23 +10,19 @@ from flask import request
 app = Flask(__name__,static_url_path='')
 config = ConfigParser.ConfigParser()
 config.read('config/sample.cfg')
-host_entries = config.get('main','hosts').split(",")
 
 class Host(object):
-    def __init__(self, location):
+    def __init__(self, name, location):
+        self.name = name
         self.location = location
-        if "tcp" == location.split(":")[0]:
-            self.name = location[6:].split(":")[0]
-        else:
-            self.name = "Localhost"
         self.conn = docker.Client(base_url=self.location,
                             version='1.12',
                             timeout=10)
 
 hosts={}
-for host in host_entries:
-    newhost = Host(host)
-    hosts[newhost.name] = newhost
+for name,location in config.items('main'):
+    newhost = Host(name, location)
+    hosts[name] = newhost
 
 @app.route("/old")
 def oldindex():

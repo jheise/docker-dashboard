@@ -8,13 +8,23 @@ function add_containers(host, details){
         var containers = $(".containers#"+host);
         var new_contain = $("<div class='container'></div>");
         new_contain.append("<span 'container_name'><h3>" + cont_name + "</h3></span>");
-        new_contain.append("<span 'container_detail'>" + details[x]["Status"] + "</span>");
-        new_contain.append("<span 'container_detail'>" + details[x]["Command"] + "</span>");
+        var new_table = $("<table class='table table-striped table-hover'></table>");
+        new_table.append("<thead><tr><th>Status</th><th>Command</th><th>Control</th></tr></thead>");
+        new_table.appendTo(new_contain);
+        var table_body = $("<tbody></tbody>");
+        var table_row = $("<tr></tr>");
+        table_row.append("<th><span 'container_detail'>" + details[x]["Status"] + "</span></th>");
+        table_row.append("<th><span 'container_detail'>" + details[x]["Command"] + "</span></th>");
+        var commands = $("<th></th>");
         var start_button = $("<button type='button' class='btn btn-success disabled' id='start|"+host+"|"+cont_name+"'>Start</button>");
         var stop_button = $("<button type='button' class='btn btn-danger disabled' id='stop|"+host+"|"+cont_name+"'>Stop</button>");
+        start_button.appendTo(commands);
+        stop_button.appendTo(commands);
+        commands.appendTo(table_row);
+        table_row.appendTo(table_body);
+        table_body.appendTo(new_table);
 
-        start_button.appendTo(new_contain);
-        stop_button.appendTo(new_contain);
+        new_contain.append("</table>");
         if(cont_status[0] == "Up"){
             stop_button.removeClass("disabled");
         } else {
@@ -72,3 +82,9 @@ get_hosts(function(hosts){
         get_details(hosts[x], add_containers);
     }
 });
+
+function updateTime(){
+    console.log("updating");
+}
+
+setInterval(updateTime, 30000);
