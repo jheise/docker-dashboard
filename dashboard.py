@@ -33,19 +33,18 @@ def oldindex():
         template_data['containers'][host.name] = [x for x in host.conn.containers()]
     return render_template("index.html.old", **template_data)
 
+@app.route("/new")
+def newindex():
+    template_data = {"hosts":[]}
+    template_data['containers'] = {}
+    for host in hosts.values():
+        template_data['hosts'].append(host.name)
+        template_data['containers'][host.name] = [x for x in host.conn.containers(all=True)]
+    return render_template("index.html.new", **template_data)
+
 @app.route("/")
 def index():
-    #template_data = {"hosts":[]}
-    #template_data['containers'] = {}
-    #for host in hosts.values():
-        #template_data['hosts'].append(host.name)
-        #conn = docker.Client(base_url=host.location,
-                            #version='1.12',
-                            #timeout=10)
-        #template_data['containers'][host.name] = [x for x in conn.containers()]
-    #return render_template("index.html", **template_data)
     return render_template("index.html")
-    #return app.send_static("
 
 @app.route("/hosts")
 def get_hosts():
@@ -74,13 +73,12 @@ def container_actions(hostname,container):
 
 #start and stop actions
 def container_start_stop(hostname, container, action):
-    print "running", action, hostname, container
     try:
         host = hosts[hostname]
         if action == "start":
             host.conn.start(container)
         else:
-            host.conn.stop(container)
+            host.conn.stop(container,timeout=90)
         return { "result":"success"}
     except Exception as e:
         return { "result":"failure","reason":str(e) }
