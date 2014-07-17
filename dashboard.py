@@ -78,7 +78,7 @@ def container_start_stop(hostname, container, action):
         if action == "start":
             host.conn.start(container)
         else:
-            host.conn.stop(container,timeout=90)
+            host.conn.stop(container,timeout=10)
         return { "result":"success"}
     except Exception as e:
         return { "result":"failure","reason":str(e) }

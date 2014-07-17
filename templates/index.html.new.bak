@@ -6,38 +6,32 @@
     <body>
         <h1>Docker Hosts</h1>
         <div class="hosts">
-        <table class="table table-striped table-hover">
+        {% for host in hosts %}
         <div class="host_div" id="{{ host }}">
+        <h2>{{host}}</h2>
+            {% for container in containers[host] %}
+            {% set cont_name = container['Names'][0][1:]%}
+            <h3>{{cont_name}}</h3>
+            <table class="table table-striped table-hover">
                 <thead>
                 <tr>
-                    <th>Host</th>
-                    <th>Container</th>
-                    <th>Status</th>
-                    <th>Command</th>
-                    <th>Image</th>
-                    <th>Controls</th>
+                    <th>Status</th><th>Command</th><th>Controls</th>
                 </tr>
                 </thead>
                 <tbody>
-        {% for host in hosts %}
-                {% for container in containers[host] %}
-                {% set cont_name = container['Names'][0][1:]%}
                 <tr>
-                    <th>{{host}}</th>
-                    <th>{{cont_name}}</th>
                     <th><span id="status-{{host}}-{{cont_name}}">{{container['Status']}}</span></th>
-                    <th>{{container['Command']}}</th>
                     <th>{{container['Image']}}</th>
                     <th>
                     <button type="button" class="btn btn-success disabled control" id="start-{{host}}-{{cont_name}}">Start</button>
                     <button type="button" class="btn btn-danger disabled control" id="stop-{{host}}-{{cont_name}}">Stop</button>
                     </th>
                 </tr>
-                {% endfor %}
                 </tbody>
-        {% endfor %}
             </table>
+            {% endfor %}
         </div>
+        {% endfor %}
         </div>
         <script type="text/javascript" src="/js/jquery.min.js"></script>
         <script type="text/javascript" src="/js/docker.js"></script>
