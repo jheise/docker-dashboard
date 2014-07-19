@@ -6,10 +6,37 @@ import json
 from flask import render_template
 from flask import Flask
 from flask import request
+from flask import Response
+
+from functools import wraps
 
 app = Flask(__name__,static_url_path='')
 config = ConfigParser.ConfigParser()
 config.read('config/sample.cfg')
+
+
+
+def check_auth(username, password):
+    """This function is called to check if a username /
+    password combination is valid.
+    """
+    return username == 'admin' and password == 'secret'
+
+def authenticate():
+    """Sends a 401 response that enables basic auth"""
+    return Response(
+    'Could not verify your access level for that URL.\n'
+    'You have to login with proper credentials', 401,
+    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 class Host(object):
     def __init__(self, name, location):
@@ -34,6 +61,7 @@ def oldindex():
     return render_template("index.html.old", **template_data)
 
 @app.route("/new")
+@requires_auth
 def newindex():
     template_data = {"hosts":[]}
     template_data['containers'] = {}
@@ -47,22 +75,26 @@ def index():
     return render_template("index.html")
 
 @app.route("/hosts")
+@requires_auth
 def get_hosts():
     return json.dumps(hosts.keys())
 
 @app.route("/hosts/<hostname>")
+@requires_auth
 def get_host_detail(hostname):
     host = hosts[hostname]
     containers = [x for x in host.conn.containers(all=True)]
     return json.dumps(containers)
 
 @app.route("/hosts/<hostname>/containers")
+@requires_auth
 def get_host_containers(hostname):
     host = hosts[hostname]
     containers = [x for x in host.conn.containers(all=True)]
     return json.dumps(containers)
 
 @app.route("/hosts/<hostname>/containers/<container>", methods=["POST"])
+@requires_auth
 def container_actions(hostname,container):
     action = request.form["action"]
     response = {"result":"failure","reason":"Action {0} unsupported".format(action)}
