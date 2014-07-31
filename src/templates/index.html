@@ -1,0 +1,67 @@
+<html>
+    <head>
+        <title>Docker Dashboard</title>
+        <link href="/css/bootstrap.css" rel="stylesheet" media="screen">
+    </head>
+    <body>
+        <div class="container">
+        <div class="navbar navbar-default" role="navigation">
+          <div class="navbar-header">
+            <a class="navbar-brand" href="#">Dashboard</a>
+          </div>
+            <form class="navbar-form navbar-left">
+              <input id="filter" class="form-control col-lg-8" placeholder="Search" type="text">
+            </form>
+            <div class="navbar-right">
+                <button type="button" class="btn btn-success masscontrol" id="start">Start</button>
+                <button type="button" class="btn btn-primary masscontrol" id="stop">Stop</button>
+            </div>
+        </div>
+
+
+        <div class="hosts">
+        <table class="table table-striped table-hover">
+        <div class="host_div" id="{{ host }}">
+                <thead>
+                <tr>
+                    <th>Host</th>
+                    <th>Container</th>
+                    <th>Status</th>
+                    <th>Command</th>
+                    <th>Env</th>
+                    <th>Image</th>
+                    <th>Controls</th>
+                </tr>
+                </thead>
+                <tbody>
+            {% for host in hosts %}
+                {% for container in containers[host] %}
+                {% set cont_name = container['Names'][0][1:]%}
+                <tr class="dockercontainer">
+                    <td class="hostname">{{host}}</td>
+                    <td class="cname" >{{cont_name}}</td>
+                    <td><span id="status-{{host}}-{{cont_name}}">{{container['Status']}}</span></td>
+                    <td>{{container['Command']}}</td>
+                    <td class="cenv">{{details[host][cont_name]['Config']['Env']}}</td>
+                    <td>{{container['Image']}}</td>
+                    <td>
+                    <button type="button" class="btn btn-success disabled control" id="start-{{host}}-{{cont_name}}">Start</button>
+                    <button type="button" class="btn btn-primary disabled control" id="stop-{{host}}-{{cont_name}}">Stop</button>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+        {% endfor %}
+            </table>
+        </div>
+        </div>
+        </div>
+        <script>
+            var updateserver = {{update_url | safe}};
+        </script>
+        <script type="text/javascript" src="/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/js/docker.js"></script>
+        <script type="text/javascript" src="/js/newdashboard.js"></script>
+        <script type="text/javascript" src="/js/bootstrap.js"></script>
+    </body>
+<html>

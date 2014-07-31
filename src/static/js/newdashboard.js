@@ -51,7 +51,52 @@ $("button.control").click(function(){
     }
 });
 
+$("button.masscontrol").click(function(){
+    var action = this.id;
+    var instances = new Object();
+    $(".dockercontainer:not(.hidden)").each(function(index, element){
+        var hostname = $(element).find(".hostname").text();
+        var cname = $(element).find(".cname").text();
+        if( instances[hostname] == undefined){
+            instances[hostname] = new Array();
+        }
+        instances[hostname][instances[hostname].length] = cname;
+    });
+    console.log("going to post");
+    $.post("../massaction",
+        { action:action,
+          instances:JSON.stringify(instances)},
+        function( data){
+    });
+    console.log("done posting");
+});
+
+$("#filter").keyup(function(){
+    var data = $(this).val();
+    console.log("filter is " + data);
+    $(".dockercontainer").each(function(index, element){
+        var cur_name = $(element).find(".cname").text()
+        var cur_env =  $(element).find(".cenv").text()
+        if(cur_name.indexOf(data) == -1 && cur_env.indexOf(data) == -1){
+            $(element).addClass("hidden");
+        }else{
+            $(element).removeClass("hidden");
+        }
+    });
+});
 //do first update to set buttons
 update();
 
-setInterval(update, 15000);
+/*now connect to the update socket to start pulling in updates*/
+var updatesocket = new WebSocket(updateserver)
+updatesocket.onmessage = function(msg){
+    var data = JSON.parse(msg.data);
+    handle_update_containers(data["host"], data["containers"]);
+    console.log(data);
+}
+
+updatesocket.onclose = function(){
+    console.log("update closed");
+    this.updatesocket = new WebSocket(updatesocket.url)
+}
+
