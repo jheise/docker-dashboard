@@ -91,12 +91,17 @@ update();
 var updatesocket = new WebSocket(updateserver)
 updatesocket.onmessage = function(msg){
     var data = JSON.parse(msg.data);
-    handle_update_containers(data["host"], data["containers"]);
+    if( data["message_type"] == "update" ){
+        handle_update_containers(data["host"], data["containers"]);
+    }else{
+        console.log(data["body"]);
+    }
     console.log(data);
 }
 
 updatesocket.onclose = function(){
     console.log("update closed");
-    this.updatesocket = new WebSocket(updatesocket.url)
+    this.updatesocket = new WebSocket(updatesocket.url);
+    console.log("new websocket created");
 }
 

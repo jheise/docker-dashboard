@@ -57,8 +57,11 @@ class UpdateBackend(object):
 
     def register(self, client):
         """register client connection"""
+        app.logger.info("Registering client {0}".format(client))
         self.clients.append(client)
         app.log.info("registering {0}".format(client))
+        self.send(client, {"message_type":"init",
+                           "body":"First Message"})
 
     def send(self, client, data):
         """send data to client"""
@@ -74,7 +77,10 @@ class UpdateBackend(object):
                 print "sending update"
                 for host in hosts.values():
                     containers = [x for x in host.conn.containers(all=True)]
-                    gevent.spawn(self.send, client, json.dumps({"host": host.name, "containers": containers}))
+                    gevent.spawn(self.send, client, json.dumps(
+                        {"message_type": "update",
+                         "host": host.name,
+                         "containers": containers}))
             gevent.sleep(15)
 
     def start(self):
@@ -128,12 +134,14 @@ def index():
     template_data["update_url"] = update_url
     for host in hosts.values():
         template_data['hosts'].append(host.name)
-        template_data['containers'][host.name] = [x for x in host.conn.containers(all=True)]
+        template_data['containers'][host.name] = \
+            [ x for x in  host.conn.containers(all=True)]
         template_data['details'][host.name] = {}
         for container in template_data['containers'].values():
             names = [x['Names'][0][1:] for x in container]
             for name in names:
-                template_data['details'][host.name][name] = host.conn.inspect_container(name)
+                template_data['details'][host.name][name] = \
+                    host.conn.inspect_container(name)
 
     return render_template("index.html", **template_data)
 
@@ -168,7 +176,8 @@ def get_host_containers(target):
 def container_actions(target, container):
     """stop or start given container on given host"""
     action = request.form["action"]
-    response = {"result": "failure", "reason": "Action {0} unsupported".format(action)}
+    response = {"result": "failure",
+                "reason": "Action {0} unsupported".format(action)}
     app.logger.info("{0} on {1}/{2}".format(action, target, container))
     if action in ["start", "stop"]:
         response = container_start_stop(target, container, action)
@@ -185,7 +194,8 @@ def mass_action():
     for target, instances in data.items():
         for instance in instances:
             container_start_stop(target, instance, action)
-    response = {"result": "failure", "reason": "Action {0} unsupported".format(action)}
+    response = {"result": "failure",
+                "reason": "Action {0} unsupported".format(action)}
 
     return json.dumps(response)
 
