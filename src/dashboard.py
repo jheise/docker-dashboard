@@ -59,6 +59,8 @@ class UpdateBackend(object):
         """register client connection"""
         app.logger.info("Registering client {0}".format(client))
         self.clients.append(client)
+        self.send(client, {"message_type":"init",
+                           "body":"First Message"})
 
     def send(self, client, data):
         """send data to client"""
@@ -75,7 +77,9 @@ class UpdateBackend(object):
                 for host in hosts.values():
                     containers = [x for x in host.conn.containers(all=True)]
                     gevent.spawn(self.send, client, json.dumps(
-                        {"host": host.name, "containers": containers}))
+                        {"message_type": "update",
+                         "host": host.name,
+                         "containers": containers}))
             gevent.sleep(15)
 
     def start(self):
