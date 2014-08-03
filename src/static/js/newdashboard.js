@@ -97,6 +97,7 @@ updatesocket.onmessage = function(msg){
 
 updatesocket.onclose = function(){
     console.log("update closed");
-    this.updatesocket = new WebSocket(updatesocket.url)
+    this.updatesocket = new WebSocket(updatesocket.url);
+    console.log("new websocket created");
 }
 
