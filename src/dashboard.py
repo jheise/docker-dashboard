@@ -58,6 +58,7 @@ class UpdateBackend(object):
     def register(self, client):
         """register client connection"""
         self.clients.append(client)
+        app.log.info("registering {0}".format(client))
 
     def send(self, client, data):
         """send data to client"""
