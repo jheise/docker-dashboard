@@ -88,7 +88,13 @@ $("#filter").keyup(function(){
 update();
 
 /*now connect to the update socket to start pulling in updates*/
-var updatesocket = new WebSocket(updateserver)
+var updatesocket = new WebSocket(updateserver);
+
+updatesocket.onopen = function(){
+    console.log("websocket to "  + updateserver);
+}
+
+
 updatesocket.onmessage = function(msg){
     var data = JSON.parse(msg.data);
     if( data["message_type"] == "update" ){
@@ -96,12 +102,13 @@ updatesocket.onmessage = function(msg){
     }else{
         console.log(data["body"]);
     }
-    console.log(data);
 }
 
 updatesocket.onclose = function(){
-    console.log("update closed");
     this.updatesocket = new WebSocket(updatesocket.url);
-    console.log("new websocket created");
+}
+
+updatesocket.onerror = function(){
+    this.updatesocket = new WebSocket(updatesocket.url);
 }
 

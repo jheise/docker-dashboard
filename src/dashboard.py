@@ -59,7 +59,7 @@ class UpdateBackend(object):
         """register client connection"""
         app.logger.info("Registering client {0}".format(client))
         self.clients.append(client)
-        app.log.info("registering {0}".format(client))
+        app.logger.info("registering {0}".format(client))
         self.send(client, {"message_type":"init",
                            "body":"First Message"})
 
@@ -74,7 +74,7 @@ class UpdateBackend(object):
         """run websocket server"""
         while True:
             for client in self.clients:
-                print "sending update"
+                app.logger.info("sending update")
                 for host in hosts.values():
                     containers = [x for x in host.conn.containers(all=True)]
                     gevent.spawn(self.send, client, json.dumps(
@@ -130,6 +130,7 @@ def requires_auth(f):
 @requires_auth
 def index():
     """assemble basic layout and serve page"""
+    app.logger.info("Loading page")
     template_data = {"hosts": [], 'containers': {}, 'details': {}}
     template_data["update_url"] = update_url
     for host in hosts.values():
@@ -204,6 +205,7 @@ def mass_action():
 @sockets.route("/updates")
 def updates(ws):
     """add client connection to backend"""
+    app.logger.info("registering websocket {0}".format(ws))
     updater.register(ws)
 
     while not ws.closed:
