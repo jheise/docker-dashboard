@@ -45,8 +45,11 @@ class Host(object):
 
 hosts = {}
 for hostname, server_location in config.items('hosts'):
-    new_host = Host(hostname, server_location)
-    hosts[hostname] = new_host
+    try:
+        new_host = Host(hostname, server_location)
+        hosts[hostname] = new_host
+    except ConnectionError as e:
+        app.logger.error(e)
 
 
 class UpdateBackend(object):
@@ -134,15 +137,23 @@ def index():
     template_data = {"hosts": [], 'containers': {}, 'details': {}}
     template_data["update_url"] = update_url
     for host in hosts.values():
-        template_data['hosts'].append(host.name)
-        template_data['containers'][host.name] = \
-            [ x for x in  host.conn.containers(all=True)]
-        template_data['details'][host.name] = {}
-        for container in template_data['containers'].values():
-            names = [x['Names'][0][1:] for x in container]
-            for name in names:
-                template_data['details'][host.name][name] = \
-                    host.conn.inspect_container(name)
+        try:
+            template_data['hosts'].append(host.name)
+            template_data['containers'][host.name] = \
+                [ x for x in  host.conn.containers(all=True)]
+            template_data['details'][host.name] = {}
+            for container in template_data['containers'].values():
+                names = [x['Names'][0][1:] for x in container]
+                for name in names:
+                        template_data['details'][host.name][name] = \
+                            host.conn.inspect_container(name)
+        except Exception as e:
+            app.logger.error(e)
+
+    for host in template_data['containers']:
+        for key in template_data['containers'][host]:
+            if key not in template_data['details'][host].keys():
+                template_data["containers"][host].remove(key)
 
     return render_template("index.html", **template_data)
 
