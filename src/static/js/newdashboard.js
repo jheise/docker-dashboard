@@ -62,18 +62,18 @@ $("button.masscontrol").click(function(){
         }
         instances[hostname][instances[hostname].length] = cname;
     });
-    console.log("going to post");
+    /*console.log("going to post");*/
     $.post("../massaction",
         { action:action,
           instances:JSON.stringify(instances)},
         function( data){
     });
-    console.log("done posting");
+    /*console.log("done posting");*/
 });
 
 $("#filter").keyup(function(){
     var data = $(this).val();
-    console.log("filter is " + data);
+    /*console.log("filter is " + data);*/
     $(".dockercontainer").each(function(index, element){
         var cur_name = $(element).find(".cname").text()
         var cur_env =  $(element).find(".cenv").text()
@@ -107,8 +107,6 @@ updatesocket.onmessage = function(msg){
 updatesocket.onclose = function(){
     this.updatesocket = new WebSocket(updatesocket.url);
 }
-
 updatesocket.onerror = function(){
     this.updatesocket = new WebSocket(updatesocket.url);
 }
-

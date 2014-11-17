@@ -35,15 +35,15 @@
                 </thead>
                 <tbody>
             {% for host in hosts %}
-                {% for container in containers[host] %}
-                {% set cont_name = container['Names'][0][1:]%}
+                {% for container in hosts[host] %}
+                {% set cont_name = container["name"] %}
                 <tr class="dockercontainer">
                     <td class="hostname">{{host}}</td>
-                    <td class="cname" >{{cont_name}}</td>
-                    <td><span id="status-{{host}}-{{cont_name}}">{{container['Status']}}</span></td>
-                    <td>{{container['Command']}}</td>
-                    <td class="cenv">{{details[host][cont_name]['Config']['Env']}}</td>
-                    <td>{{container['Image']}}</td>
+                    <td class="cname" >{{container["name"] }}</td>
+                    <td><span id="status-{{host}}-{{cont_name}}">{{container['data']['Status']}}</span></td>
+                    <td>{{container['data']['Command']}}</td>
+                    <td class="cenv">{{container['details']['Config']['Env']}}</td>
+                    <td>{{container['data']['Image']}}</td>
                     <td>
                     <button type="button" class="btn btn-success disabled control" id="start-{{host}}-{{cont_name}}">Start</button>
                     <button type="button" class="btn btn-primary disabled control" id="stop-{{host}}-{{cont_name}}">Stop</button>

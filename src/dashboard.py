@@ -134,26 +134,19 @@ def requires_auth(f):
 def index():
     """assemble basic layout and serve page"""
     app.logger.info("Loading page")
-    template_data = {"hosts": [], 'containers': {}, 'details': {}}
-    template_data["update_url"] = update_url
+    template_data = {"hosts": {}, "update_url": update_url}
     for host in hosts.values():
+        host_data = []
         try:
-            template_data['hosts'].append(host.name)
-            template_data['containers'][host.name] = \
-                [ x for x in  host.conn.containers(all=True)]
-            template_data['details'][host.name] = {}
-            for container in template_data['containers'].values():
-                names = [x['Names'][0][1:] for x in container]
-                for name in names:
-                        template_data['details'][host.name][name] = \
-                            host.conn.inspect_container(name)
+            for container in [ x for x in  host.conn.containers(all=True)]:
+                name = container["Names"][0][1:]
+                container_data = {"name":name}
+                container_data["data"] = container
+                container_data["details"] = host.conn.inspect_container(name)
+                host_data.append(container_data)
         except Exception as e:
             app.logger.error(e)
-
-    for host in template_data['containers']:
-        for key in template_data['containers'][host]:
-            if key not in template_data['details'][host].keys():
-                template_data["containers"][host].remove(key)
+        template_data["hosts"][host.name] = host_data
 
     return render_template("index.html", **template_data)
 
