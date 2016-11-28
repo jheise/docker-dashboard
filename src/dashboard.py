@@ -23,7 +23,7 @@ sockets = Sockets(app)
 
 #grab the config
 config = ConfigParser.ConfigParser()
-config.read('config/sample.cfg')
+config.read('/config/dashboard.cfg')
 
 address = config.get('main', 'host')
 port = config.get('main', 'port')
